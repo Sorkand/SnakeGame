@@ -122,9 +122,16 @@ public class Snake {
                 body.add(headPosition, locationValidator.validateLocation(newHead));
             }
 
-            if (growthCounter <= 0) {
+            if (growthCounter == 0) {
                 body.remove(body.size() - 1);
-            } else {
+            } else if  (growthCounter < 0){
+                while (growthCounter < 0) {
+                    body.remove(body.size() - 1);
+                    growthCounter++;
+                } 
+            }
+            else {
+                
                 growthCounter--;
             }
         }

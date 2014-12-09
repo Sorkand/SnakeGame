@@ -33,7 +33,7 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
     public final int MEDIUM_SPEED = 5;
     public final int HIGH_SPEED = 3;
 
-    private int moveDelayLimit = MEDIUM_SPEED;
+    private int moveDelayLimit = SLOW_SPEED;
     private int moveDelayCounter = 0;
     public Point randomize;
 
@@ -65,13 +65,13 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
         gridObjects = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             gridObjects.add(new GridObject(GridObjectType.POISON_BOTTLE, getRandomPoint()));
-
+            gridObjects.add(new GridObject(GridObjectType.APPLE, getRandomPoint()));
         }
 
     }
 
     public Point getRandomPoint() {
-        return new Point((int) (grid.getRows() * Math.random()), (int) (grid.getColumns() * Math.random()));
+        return new Point((int) (grid.getRows() * Math.random()), (int) (grid.getRows() * Math.random()));
     }
 
     @Override
@@ -132,7 +132,11 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
         if (gridObjects != null) {
             for (GridObject gridObject : gridObjects) {
                 if (gridObject.getType() == GridObjectType.POISON_BOTTLE) {
-                    GraphicsPalette.drawPoisonBottle(graphics, grid.getCellSystemCoordinate(gridObject.getLocation()), grid.getCellSize(), Color.YELLOW);
+                    GraphicsPalette.drawPoisonBottle(graphics, grid.getCellSystemCoordinate(gridObject.getLocation()), grid.getCellSize(), Color.GREEN);
+
+                } else if (gridObject.getType() == GridObjectType.APPLE) {
+                    GraphicsPalette.drawApple(graphics, grid.getCellSystemCoordinate(gridObject.getLocation()), grid.getCellSize(), Color.RED);
+
                 }
             }
         }
@@ -167,8 +171,49 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
             point.y = 0;
         }
 
+        //check if the snake hits a GridObjectm then take approproate action:
+        // - Apple - grow snake by 3
+        // - Poison - make sound, kill snake
+        //
+        //Look at all the locations stored in the gridObject ArrayList
+        //for each, compare it to the head location stored
+        // in the "point" parameter
+        for (GridObject object : this.gridObjects) {
+            if (object.getLocation().equals(point)) {
+                if (object.getType() == GridObjectType.APPLE) {
+                    snake.grow(3);
+                    object.setLocation(getRandomPoint());
+                    increaseSnakeSpeed();
+
+                } else if (object.getType() == GridObjectType.POISON_BOTTLE) {
+                    snake.grow(-3);
+                    object.setLocation(getRandomPoint());
+                    decreaseSnakeSpeed();
+
+                }
+            }
+        }
+
         return point;
 
+    }
+
+    private void increaseSnakeSpeed() {
+        if (moveDelayLimit == MEDIUM_SPEED) {
+            moveDelayLimit = HIGH_SPEED;
+        } else if (moveDelayLimit == SLOW_SPEED) {
+            moveDelayLimit = MEDIUM_SPEED;
+        }
+    }
+    
+    private void decreaseSnakeSpeed() {
+        if (moveDelayLimit == MEDIUM_SPEED) {
+            moveDelayLimit = SLOW_SPEED;
+        } else if (moveDelayLimit == HIGH_SPEED) {
+            moveDelayLimit = MEDIUM_SPEED;
+        } else if (moveDelayLimit == SLOW_SPEED) {
+            snake.togglePaused();
+        }
     }
 
 }
