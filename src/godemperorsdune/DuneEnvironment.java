@@ -28,6 +28,7 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
 
     Grid grid;
     private Snake snake;
+    private Score score;
 
     public final int SLOW_SPEED = 8;
     public final int MEDIUM_SPEED = 5;
@@ -67,6 +68,9 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
             gridObjects.add(new GridObject(GridObjectType.POISON_BOTTLE, getRandomPoint()));
             gridObjects.add(new GridObject(GridObjectType.APPLE, getRandomPoint()));
         }
+        
+        score = new Score();
+        score.setPosition(new Point(10, 10));
 
     }
 
@@ -139,6 +143,10 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
 
                 }
             }
+        }
+        
+        if (score != null) {
+            score.draw(graphics);
         }
     }
 
