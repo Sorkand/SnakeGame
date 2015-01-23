@@ -40,6 +40,8 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
 
     private ArrayList<GridObject> gridObjects;
 
+    private GameState gameState = GameState.PLAYING;
+
     public DuneEnvironment() {
     }
 
@@ -68,7 +70,7 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
             gridObjects.add(new GridObject(GridObjectType.POISON_BOTTLE, getRandomPoint()));
             gridObjects.add(new GridObject(GridObjectType.APPLE, getRandomPoint()));
         }
-        
+
         score = new Score();
         score.setPosition(new Point(10, 10));
 
@@ -125,50 +127,51 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
 
     @Override
     public void paintEnvironment(Graphics graphics) {
-        if (grid != null) {
-            grid.paintComponent(graphics);
-        }
+        switch (gameState) {
+            case START:
 
-        if (snake != null) {
-            snake.draw(graphics);
-        }
+                break;
 
-        if (gridObjects != null) {
-            for (GridObject gridObject : gridObjects) {
-                if (gridObject.getType() == GridObjectType.POISON_BOTTLE) {
-                    GraphicsPalette.drawPoisonBottle(graphics, grid.getCellSystemCoordinate(gridObject.getLocation()), grid.getCellSize(), Color.GREEN);
-
-                } else if (gridObject.getType() == GridObjectType.APPLE) {
-                    GraphicsPalette.drawApple(graphics, grid.getCellSystemCoordinate(gridObject.getLocation()), grid.getCellSize(), Color.RED);
-
+            case PLAYING:
+                if (grid != null) {
+                    grid.paintComponent(graphics);
                 }
-            }
+
+                if (snake != null) {
+                    snake.draw(graphics);
+                }
+
+                if (gridObjects != null) {
+                    for (GridObject gridObject : gridObjects) {
+                        if (gridObject.getType() == GridObjectType.POISON_BOTTLE) {
+                            GraphicsPalette.drawPoisonBottle(graphics, grid.getCellSystemCoordinate(gridObject.getLocation()), grid.getCellSize(), Color.GREEN);
+
+                        } else if (gridObject.getType() == GridObjectType.APPLE) {
+                            GraphicsPalette.drawApple(graphics, grid.getCellSystemCoordinate(gridObject.getLocation()), grid.getCellSize(), Color.RED);
+
+                        }
+                    }
+                }
+
+                if (score != null) {
+                    score.draw(graphics);
+                }
+
+                break;
+
+            case OVER:
+
         }
-        
-        if (score != null) {
-            score.draw(graphics);
-        }
-    }
-
-//<editor-fold defaultstate="collapsed" desc="GridDrawData Interface">
-    @Override
-    public int getCellHeight() {
-        return grid.getCellHeight();
-    }
-
-    @Override
-    public int getCellWidth() {
-        return grid.getCellWidth();
 
     }
 
-    @Override
-    public Point getCellSystemCoordinate(Point cellCoordinate) {
-        return grid.getCellSystemCoordinate(cellCoordinate);
-    }
-
+//<editor-fold defaultstate="collapsed" desc="LocationValidatorIntf">
     @Override
     public Point validateLocation(Point point) {
+        if (snake.selfHit()) {
+            System.out.println("HIT!!!!");
+        }
+
         if (point.x >= this.grid.getColumns()) {
             point.x = 0;
         } else if (point.x < 0) {
@@ -205,6 +208,24 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
         return point;
 
     }
+//</editor-fold>
+
+//<editor-fold defaultstate="collapsed" desc="GridDrawData Interface">
+    @Override
+    public int getCellHeight() {
+        return grid.getCellHeight();
+    }
+
+    @Override
+    public int getCellWidth() {
+        return grid.getCellWidth();
+
+    }
+
+    @Override
+    public Point getCellSystemCoordinate(Point cellCoordinate) {
+        return grid.getCellSystemCoordinate(cellCoordinate);
+    }
 
     private void increaseSnakeSpeed() {
         if (moveDelayLimit == MEDIUM_SPEED) {
@@ -213,7 +234,7 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
             moveDelayLimit = MEDIUM_SPEED;
         }
     }
-    
+
     private void decreaseSnakeSpeed() {
         if (moveDelayLimit == MEDIUM_SPEED) {
             moveDelayLimit = SLOW_SPEED;
@@ -222,6 +243,20 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
         } else if (moveDelayLimit == SLOW_SPEED) {
             snake.togglePaused();
         }
+    }
+
+    /**
+     * @return the gameState
+     */
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    /**
+     * @param gameState the gameState to set
+     */
+    public void setGameState(GameState gameState) {
+        this.gameState = gameState;
     }
 
 }

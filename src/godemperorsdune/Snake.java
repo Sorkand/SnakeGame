@@ -137,6 +137,15 @@ public class Snake {
         }
 
     }
+    
+    public boolean selfHit(){
+        for (int i = 1; i < body.size(); i++) {
+            if (getHead().equals(body.get(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public void grow(int length) {
         growthCounter += length;
