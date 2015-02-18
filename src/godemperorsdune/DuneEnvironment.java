@@ -30,11 +30,11 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
     private Snake snake;
     private Score score;
 
-    public final int SLOW_SPEED = 8;
-    public final int MEDIUM_SPEED = 5;
+    public final int SLOW_SPEED = 10;
+    public final int MEDIUM_SPEED = 7;
     public final int HIGH_SPEED = 3;
 
-    private int moveDelayLimit = SLOW_SPEED;
+    private int moveDelayLimit = MEDIUM_SPEED;
     private int moveDelayCounter = 0;
     public Point randomize;
 
@@ -48,9 +48,9 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
     @Override
     public void initializeEnvironment() {
 
-        this.setBackground(ResourceTools.loadImageFromResource("resources/sand_tile.jpg").getScaledInstance(1280, 800, Image.SCALE_SMOOTH));
-        grid = new Grid(25, 22, 25, 25, new Point(20, 50), Color.BLACK);
-        grid.setColor(Color.yellow);
+        this.setBackground(ResourceTools.loadImageFromResource("resources/sand_tile.jpg"));
+        Color backgroundie = new Color(255, 255, 255, 20);
+        grid = new Grid(30, 22, 22, 22, new Point(140, 50), backgroundie);
 
         snake = new TailSnake();
         snake.setDirection(Direction.DOWN);
@@ -62,17 +62,22 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
         body.add(new Point(3, 2));
         body.add(new Point(2, 2));
         body.add(new Point(2, 3));
+        body.add(new Point(3, 3));
+        body.add(new Point(4, 3));
 
         snake.setBody(body);
 
         gridObjects = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            gridObjects.add(new GridObject(GridObjectType.POISON_BOTTLE, getRandomPoint()));
             gridObjects.add(new GridObject(GridObjectType.APPLE, getRandomPoint()));
+        }
+        for (int i = 0; i < 15; i++) {
+            gridObjects.add(new GridObject(GridObjectType.POISON_BOTTLE, getRandomPoint()));
+
         }
 
         score = new Score();
-        score.setPosition(new Point(10, 10));
+        score.setPosition(new Point(20, 20));
 
     }
 
@@ -110,7 +115,7 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
         } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             snake.grow(2);
         } else if (e.getKeyCode() == KeyEvent.VK_M) {
-            AudioPlayer.play("/resources/Creepy.wav");
+            AudioPlayer.play("/resources/Music.wav");
         }
 
     }
@@ -160,7 +165,16 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
                 break;
 
             case OVER:
+                this.setBackground(ResourceTools.loadImageFromResource("resources/GameOver.png"));
+                snake.togglePaused();
 
+
+                break;
+
+        }
+
+        if (score.getValue() < 0 || snake == null) {
+            gameState = GameState.OVER;
         }
 
     }
@@ -169,7 +183,8 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
     @Override
     public Point validateLocation(Point point) {
         if (snake.selfHit()) {
-            System.out.println("HIT!!!!");
+            snake.grow(-3);
+            moveDelayLimit = SLOW_SPEED;
         }
 
         if (point.x >= this.grid.getColumns()) {
@@ -195,11 +210,13 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
                     snake.grow(3);
                     object.setLocation(getRandomPoint());
                     increaseSnakeSpeed();
+                    score.increaseValue();
 
                 } else if (object.getType() == GridObjectType.POISON_BOTTLE) {
                     snake.grow(-3);
                     object.setLocation(getRandomPoint());
                     decreaseSnakeSpeed();
+                    score.decreaseValue();
 
                 }
             }
@@ -241,7 +258,8 @@ class DuneEnvironment extends Environment implements GridDrawData, LocationValid
         } else if (moveDelayLimit == HIGH_SPEED) {
             moveDelayLimit = MEDIUM_SPEED;
         } else if (moveDelayLimit == SLOW_SPEED) {
-            snake.togglePaused();
+
+            gameState = GameState.OVER;
         }
     }
 

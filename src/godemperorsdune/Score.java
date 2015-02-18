@@ -21,6 +21,7 @@ public class Score {
         graphics.setColor(Color.white);
         graphics.drawString("Score: " + value, position.x, position.y);
         
+        
     }
     
     
@@ -34,6 +35,14 @@ public class Score {
      */
     public int getValue() {
         return value;
+    }
+    
+    public int increaseValue() {
+        return value += 100;
+    }
+    
+    public int decreaseValue() {
+        return value -= 250;
     }
     
     /**

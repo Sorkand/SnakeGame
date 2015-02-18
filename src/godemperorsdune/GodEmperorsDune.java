@@ -17,7 +17,8 @@ public class GodEmperorsDune {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        ApplicationStarter.run("God Emperor's Dune", new DuneEnvironment());
+        ApplicationStarter.run("Dunes", new DuneEnvironment());
+
     }
     
 }
